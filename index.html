@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إلى حبيبتي خالتو | LOVE ❤️</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================== المتغيرات والتنسيق العام ================== */
+        :root {
+            --purple-deep: #281130;
+            --purple-main: #785ca9;
+            --pink-soft: #eab7e4;
+            --red-ruby: #c03144;
+            --blue-soft: #a1cde8;
+            --glass-bg: rgba(45, 20, 52, 0.45);
+            --glass-border: rgba(234, 183, 228, 0.28);
+            --glass-card: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Tajawal', sans-serif;
+            background: radial-gradient(circle at 50% 15%, #4a1f4b 0%, #200d25 60%, #110514 100%);
+            color: #ffffff;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 12px;
+            position: relative;
+        }
+
+        /* خلفية القلوب والنجوم المتحركة */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* زر الأغنية الرومانسي LOVE */
+        .music-pill {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 100;
+            background: rgba(192, 49, 68, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--pink-soft);
+            padding: 7px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .music-pill.playing {
+            background: linear-gradient(135deg, var(--red-ruby), var(--purple-main));
+            box-shadow: 0 0 18px var(--pink-soft);
+        }
+
+        .disc-icon {
+            display: inline-block;
+            animation: rotateDisc 3s linear infinite;
+            animation-play-state: paused;
+        }
+
+        .music-pill.playing .disc-icon {
+            animation-play-state: running;
+        }
+
+        @keyframes rotateDisc {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ================== حاوية التطبيق الزجاجية ================== */
+        .app-window {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            height: 94vh;
+            max-height: 760px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 15px rgba(234, 183, 228, 0.15);
+            display: flex;
+            flex-direction: column;
+            padding: 16px 14px;
+            overflow: hidden;
+        }
+
+        /* زخارف أركان زجاجية ناعمة */
+        .corner-ornament {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            pointer-events: none;
+            opacity: 0.35;
+            stroke: var(--pink-soft);
+            fill: none;
+        }
+        .top-right { top: 8px; right: 8px; }
+        .top-left { top: 8px; left: 8px; transform: scaleX(-1); }
+        .bottom-right { bottom: 8px; right: 8px; transform: scaleY(-1); }
+        .bottom-left { bottom: 8px; left: 8px; transform: scale(-1); }
+
+        /* منطقة الترويسة العلوية الثابتة */
+        .header-section {
+            flex-shrink: 0;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header-section h1 {
+            font-family: 'Amiri', serif;
+            font-size: 1.55rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(234, 183, 228, 0.6);
+            margin-bottom: 2px;
+        }
+
+        .header-section p {
+            font-size: 0.85rem;
+            color: var(--blue-soft);
+        }
+
+        /* دوائر المراحل المنظمة */
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .step-bubble {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid var(--purple-main);
+            color: var(--pink-soft);
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .step-bubble.active {
+            background: linear-gradient(135deg, var(--red-ruby), var(--purple-main));
+            color: #fff;
+            border-color: var(--pink-soft);
+            transform: scale(1.1);
+            box-shadow: 0 0 12px rgba(234, 183, 228, 0.7);
+        }
+
+        .step-line {
+            width: 25px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .step-line.active {
+            background: linear-gradient(to left, var(--pink-soft), var(--red-ruby));
+        }
+
+        /* ================== جسم المحتوى ================== */
+        .stages-body {
+            flex: 1 1 auto;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 10px 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .stages-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .stages-body::-webkit-scrollbar-thumb {
+            background: rgba(234, 183, 228, 0.2);
+            border-radius: 10px;
+        }
+
+        .stage-pane {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100%;
+        }
+
+        .stage-pane.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ================== إصلاح الظرف الهندسي الصحيح ================== */
+        .envelope-wrapper {
+            position: relative;
+            width: 260px;
+            height: 160px;
+            margin: 65px auto 25px; /* إعطاء مساحة علوية لخروج الرسالة دون تصادم */
+            perspective: 1000px;
+        }
+
+        .envelope-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #472965; /* قاعدة الظرف من الداخل */
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        /* غطاء الظرف العلوي */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-top: 90px solid #785ca9;
+            transform-origin: top;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s;
+            z-index: 5; /* وهو مغلق يكون في الواجهة */
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* جيب الظرف الأمامي (الذي تختبئ خلفه الرسالة) */
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 130px solid #5a3880;
+            border-right: 130px solid #5a3880;
+            border-bottom: 90px solid #6b4498;
+            border-top: 70px solid transparent;
+            border-radius: 0 0 14px 14px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ختم الشمع */
+        .envelope-seal {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 44px;
+            background: radial-gradient(circle, #e63956, var(--red-ruby));
+            border: 2px solid var(--pink-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            z-index: 6;
+            transition: all 0.35s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* كرت ورقة الرسالة */
+        .letter-slip {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            width: 90%;
+            background: #ffffff;
+            color: #2b1130;
+            border-radius: 12px;
+            padding: 14px 12px;
+            font-family: 'Amiri', serif;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            text-align: center;
+            z-index: 2; /* بالداخل */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.65s cubic-bezier(0.19, 1, 0.22, 1), z-index 0.2s 0.2s;
+        }
+
+        /* ============ عند فتح الظرف ============ */
+        /* 1. الغطاء ينقلب 180 درجة ويرجع للخلف تماماً */
+        .envelope-box.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1; /* السر: يصبح خلف كل شيء */
+        }
+
+        /* 2. الختم يختفي بسلاسة */
+        .envelope-box.opened .envelope-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.2);
+            pointer-events: none;
+        }
+
+        /* 3. الرسالة ترتفع للأعلى وتصبح في واجهة الشاشة فوق الظرف */
+        .envelope-box.opened .letter-slip {
+            transform: translateX(-50%) translateY(-105px);
+            z-index: 10; /* يعلو فوق الظرف والغطاء */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+        }
+
+        /* ================== كروت المرحلة 2 ================== */
+        .cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .ghazal-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ghazal-card:active {
+            transform: scale(0.98);
+        }
+
+        .ghazal-card.revealed {
+            background: linear-gradient(135deg, rgba(192, 49, 68, 0.35), rgba(120, 92, 169, 0.4));
+            border-color: var(--pink-soft);
+        }
+
+        .ghazal-card .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--pink-soft);
+        }
+
+        .ghazal-card .card-content {
+            font-family: 'Amiri', serif;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #fff;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .ghazal-card.revealed .card-content {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* المرحلة 3 */
+        .parchment-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 18px 14px;
+            width: 100%;
+            box-shadow: inset 0 0 15px rgba(234, 183, 228, 0.1);
+        }
+
+        .love-words {
+            font-family: 'Amiri', serif;
+            font-size: 1.15rem;
+            line-height: 1.85;
+            color: #fbf0fa;
+            text-align: justify;
+            text-align-last: center;
+        }
+
+        /* المرحلة 4 */
+        .beating-heart-btn {
+            font-size: 4.2rem;
+            cursor: pointer;
+            animation: pulseBeat 1.2s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px var(--red-ruby));
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        @keyframes pulseBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .whisper-box {
+            background: rgba(161, 205, 232, 0.12);
+            border: 1px dashed var(--blue-soft);
+            border-radius: 16px;
+            padding: 14px;
+            font-family: 'Amiri', serif;
+            font-size: 1.12rem;
+            line-height: 1.6;
+            color: #fff;
+            min-height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* ================== زر الانتقال الوحيد ================== */
+        .footer-section {
+            flex-shrink: 0;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 58px;
+        }
+
+        .single-next-btn {
+            width: 100%;
+            max-width: 280px;
+            background: linear-gradient(135deg, var(--red-ruby), var(--purple-main));
+            color: #ffffff;
+            border: 1px solid var(--pink-soft);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 22px rgba(192, 49, 68, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(12px);
+            transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .single-next-btn.show-btn {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .single-next-btn:active {
+            transform: scale(0.97);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- زر تشغيل أغنية LOVE -->
+    <div class="music-pill" id="musicToggle" onclick="toggleLoveSong()">
+        <span class="disc-icon">💿</span>
+        <span id="musicLabel">LOVE 🎵 (تشغيل)</span>
+    </div>
+
+    <audio id="audioElement" loop preload="auto">
+    <source src="love.mp3" type="audio/mpeg">
+</audio>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <main class="app-window">
+        
+        <svg class="corner-ornament top-right" viewBox="0 0 100 100"><path d="M10,10 Q60,10 60,60 Q60,10 10,10 Z M20,20 Q80,20 80,80 Q30,40 20,20 Z" stroke-width="2"/></svg>
+        <svg class="corner-ornament top-left" viewBox="0 0 100 100"><path d="M10,10 Q60,10 60,60 Q60,10 10,10 Z M20,20 Q80,20 80,80 Q30,40 20,20 Z" stroke-width="2"/></svg>
+        <svg class="corner-ornament bottom-right" viewBox="0 0 100 100"><path d="M10,10 Q60,10 60,60 Q60,10 10,10 Z M20,20 Q80,20 80,80 Q30,40 20,20 Z" stroke-width="2"/></svg>
+        <svg class="corner-ornament bottom-left" viewBox="0 0 100 100"><path d="M10,10 Q60,10 60,60 Q60,10 10,10 Z M20,20 Q80,20 80,80 Q30,40 20,20 Z" stroke-width="2"/></svg>
+
+        <header class="header-section">
+            <h1>لحبيبتي خالتو  ❤️</h1>
+            <p>كل لحظة حب وانتي أجمل ما بعمري</p>
+
+            <div class="stepper-container">
+                <div class="step-bubble active" id="dot-1">1</div>
+                <div class="step-line" id="line-1"></div>
+                <div class="step-bubble" id="dot-2">2</div>
+                <div class="step-line" id="line-2"></div>
+                <div class="step-bubble" id="dot-3">3</div>
+                <div class="step-line" id="line-3"></div>
+                <div class="step-bubble" id="dot-4">4</div>
+            </div>
+        </header>
+
+        <section class="stages-body" id="stagesScrollBody">
+
+            <!-- المرحلة 1: الظرف المضبوط بالكامل -->
+            <div class="stage-pane active" id="pane-1">
+                <p style="color: var(--pink-soft); font-size: 0.95rem;">يا ارنوبتييي اضغي على الظرف بنفتح لكِ 💌</p>
+
+                <div class="envelope-wrapper">
+                    <div class="envelope-box" id="envelopeTouch" onclick="openEnvelopeStage()">
+                        <!-- غطاء الظرف -->
+                        <div class="envelope-flap"></div>
+                        
+                        <!-- ختم الشمع -->
+                        <div class="envelope-seal">💋</div>
+
+                        <!-- الورقة بالداخل -->
+                        <div class="letter-slip">
+بالنسبة لي كل يوم هو عيد حب؛ لأن عندي أحلى شخص وأكثر حدا فزت بحبه.. بحبك بحبك بحبك كثيييير يا خالتو، أتمنى تعجبك الهدية ولا تزعلي مني.. ليوثتك بيحبك ❤️
+                        </div>
+
+                        <!-- جيب الظرف الأمامي -->
+                        <div class="envelope-pocket"></div>
+                    </div>
+                </div>
+
+                <small style="color: var(--blue-soft); font-size: 0.85rem; margin-top: 15px;">(اضغطي على الظرف لفتحه ولتكمله الرحله )</small>
+            </div>
+
+            <!-- المرحلة 2: كروت الغزل -->
+            <div class="stage-pane" id="pane-2">
+                <h3 style="color: var(--pink-soft); font-size: 1.15rem; margin-bottom: 4px;">يا احلى من في الكون  ✨</h3>
+                <p style="color: var(--blue-soft); font-size: 0.85rem; margin-bottom: 12px;">المسِي كل كرت عشان تشوفي شو قلوبي عايز يحكي لك ِ:</p>
+
+                <div class="cards-list">
+                    <div class="ghazal-card" onclick="revealCard(this)">
+                        <div class="card-head">
+                            <span>سحر عيونك وجمالك 👀</span>
+                            <span class="tap-hint">المسي هنا 👈</span>
+                        </div>
+                        <div class="card-content">
+                            يا مزتي معا اني ما شفتك بس ان شاء الله ربنا يقرب لقائينا معا اني بعرف اني بشوف احلى مزه في العالم لانك اجمل حدا في حياتي !
+                        </div>
+                    </div>
+
+                    <div class="ghazal-card" onclick="revealCard(this)">
+                        <div class="card-head">
+                            <span>اعظم انتصاراتي</span>
+                            <span class="tap-hint">المسي هنا 👈</span>
+                        </div>
+                        <div class="card-content">
+                            انتصرتُ بأعظم فتاةٍ على وجهِ الأرض
+حبّاً، ولطفاً، وأنوثة، وغيرة، وحناناً.
+ولو عاد بي الزمان، لاخترتُها في كل مرة .
+                        </div>
+                    </div>
+
+                    <div class="ghazal-card" onclick="revealCard(this)">
+                        <div class="card-head">
+                            <span>وحده في العالم 🌸</span>
+                            <span class="tap-hint">المسي هنا 👈</span>
+                        </div>
+                        <div class="card-content">
+                            مافي مثلك في حياتي خالتو واتمنى تكوني في حياتي للابد يارب وربنا يدومك سعيده ومتطمئنه مثل ما اسعدتيني و طمنتي بالي .
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- المرحلة 3: الرسالة الشاعرية -->
+            <div class="stage-pane" id="pane-3">
+                <div class="parchment-box">
+                    <div style="color: var(--pink-soft); margin-bottom: 6px; font-size: 1.1rem;">❦يا أجمل وأغلى الناس على قلبي.. 🤍 ❦</div>
+                    <p class="love-words">
+                        "صحيح المسافات تبعدنا شوي، بس والله ما تقدر تبعدك عن روحي أبداً. كل يوم يمر ألقاني أشتاق لضحكتك ولكل تفصيلة لطيفة تجمعنا.
+
+أنتِ مو بعيدة زي ما يظنون، أنتِ ساكنة بقلبي وفي وسط روحي، وكل يوم أشوفك بعيوني من كثر ما غلاك كبير عندي. ✨.
+                        <br><br>
+                        سأبقى أحبك وأعزك مهما كانت البعد، وأنتظر اليوم اللي أقول لك فيه مو بس "اشتقت لك".. بل أقول: «أخيراً صرتِ قدامي ونورتي دنيتي يا خالتو!» ❤️."
+                    </p>
+                    <div style="color: var(--pink-soft); margin-top: 6px; font-size: 1.1rem;">❦ أحبك يابنت الي داخل قلوبي 😁😘 ❦</div>
+                </div>
+            </div>
+
+            <!-- المرحلة 4: الختام -->
+            <div class="stage-pane" id="pane-4">
+                <p style="color: var(--pink-soft); font-size: 0.95rem;">المسي قلبي وشوفي شو ينبض لكِ 💘</p>
+                <div class="beating-heart-btn" onclick="triggerLoveWhisper()">💖</div>
+
+                <div class="whisper-box" id="whisperText">
+                    «اضغطي على القلب عشان تسمعي همسة غزل ودعوة دافية من قلبي لقلبك..»
+                </div>
+
+                <button class="single-next-btn show-btn" style="margin-top: 15px;" onclick="explodeHearts()">
+                    <span>أمطري سماءنا بالحب والقبلات 💋✨</span>
+                </button>
+            </div>
+
+        </section>
+
+        <!-- زر الانتقال الوحيد -->
+        <footer class="footer-section">
+            <button class="single-next-btn" id="singleBtn" onclick="nextStageAction()">
+                <span id="btnLabel">اكتشفي سر قلبي معكِ ←</span>
+            </button>
+        </footer>
+
+    </main>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        const singleBtn = document.getElementById('singleBtn');
+        const btnLabel = document.getElementById('btnLabel');
+
+        const buttonTitles = [
+            "اكتشفي سر قلبي معكِ ←",
+            "قرأت كل دلالك.. كملي لي ←",
+            "عشقت كل كلمة.. خذي قلبي ←",
+            "أحبك لأخر نفس بالكون ❤️"
+        ];
+
+        function renderCurrentStep() {
+            singleBtn.classList.remove('show-btn');
+
+            for (let i = 1; i <= totalSteps; i++) {
+                const pane = document.getElementById(`pane-${i}`);
+                const dot = document.getElementById(`dot-${i}`);
+                const line = document.getElementById(`line-${i}`);
+
+                if (i === currentStep) {
+                    pane.classList.add('active');
+                    dot.classList.add('active');
+                } else {
+                    pane.classList.remove('active');
+                    if (i < currentStep) dot.classList.add('active');
+                    else dot.classList.remove('active');
+                }
+
+                if (line) {
+                    if (i < currentStep) line.classList.add('active');
+                    else line.classList.remove('active');
+                }
+            }
+
+            document.getElementById('stagesScrollBody').scrollTop = 0;
+            btnLabel.textContent = buttonTitles[currentStep - 1];
+
+            if (currentStep === 3) {
+                setTimeout(() => {
+                    singleBtn.classList.add('show-btn');
+                }, 2000);
+            } else if (currentStep === 4) {
+                singleBtn.style.display = 'none';
+            } else {
+                singleBtn.style.display = 'flex';
+            }
+        }
+
+        function nextStageAction() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                renderCurrentStep();
+                playTone(480 + (currentStep * 70));
+            }
+        }
+
+        /* فتح الظرف مع التنسيق المضبوط */
+        let envelopeIsOpen = false;
+        function openEnvelopeStage() {
+            const env = document.getElementById('envelopeTouch');
+            if (!envelopeIsOpen) {
+                env.classList.add('opened');
+                envelopeIsOpen = true;
+                playTone(650);
+                setTimeout(() => {
+                    singleBtn.classList.add('show-btn');
+                }, 650);
+            }
+        }
+
+        /* كروت الغزل */
+        let revealedCount = 0;
+        function revealCard(card) {
+            if (!card.classList.contains('revealed')) {
+                card.classList.add('revealed');
+                card.querySelector('.tap-hint').textContent = '❤️ I LOVE YOU';
+                revealedCount++;
+                playTone(540 + (revealedCount * 50));
+
+                if (revealedCount >= 2) {
+                    singleBtn.classList.add('show-btn');
+                }
+            }
+        }
+
+        /* همسات الغزل */
+        const romanticWhispers = [
+            "«يا خالتو.. ضحكتك تسوى عندي كنوز الأرض كلها، فديت قلبك وعيونك!»",
+            "«وجودك بحياتي لحاله حكاية ثانية تفتح النفس.. منورة عمري وعقلي وقلبي، وليوثتك يحبك كثييير يا أحلى خالتو ❤️س.»",
+            "«يا جعل عيونك ما تشوف إلا الفرح، ويا جعل إيدي ما تفارق إيدك أبد.»",
+            "«كل لحظة تمر وإنتِ بحياتي هي عيد حب، الله يخليكِ لي ولا يحرمني دفاكِ.»",
+            "«أحبك كثر ما في هالكون نجوم، وكثر ما نبض قلبي باسمك يا سارة!»"
+        ];
+        let whisperIndex = 0;
+        function triggerLoveWhisper() {
+            const whisperEl = document.getElementById('whisperText');
+            whisperEl.style.opacity = '0';
+            setTimeout(() => {
+                whisperEl.textContent = romanticWhispers[whisperIndex % romanticWhispers.length];
+                whisperIndex++;
+                whisperEl.style.opacity = '1';
+            }, 200);
+
+            playTone(800);
+            spawnHeartBurst();
+        }
+
+        /* ================= تشغيل الأغنية التلقائي مع أول لمسة ================= */
+        const audioElement = document.getElementById('audioElement');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicLabel = document.getElementById('musicLabel');
+        let isMusicPlaying = false;
+
+        function startMusicAuto() {
+            if (!isMusicPlaying) {
+                audioElement.play().then(() => {
+                    isMusicPlaying = true;
+                    musicToggle.classList.add('playing');
+                    musicLabel.textContent = "LOVE 🎵 (شغالة)";
+                }).catch(() => {
+                    // في حال لم يتوفر إنترنت لتشغيل الرابط ولم تضع ملف love.mp3
+                    startSynthesizedLoveMelody();
+                    isMusicPlaying = true;
+                    musicToggle.classList.add('playing');
+                    musicLabel.textContent = "LOVE 🎵 (شغالة)";
+                });
+            }
+        }
+
+        // 👈 الاستماع لأول لمسة في أي مكان بالصفحة لتشغيل الأغنية فوراً
+        window.addEventListener('click', startMusicAuto, { once: true });
+        window.addEventListener('touchstart', startMusicAuto, { once: true });
+
+        // زر التبديل اليدوي للأغنية (إيقاف / تشغيل)
+        function toggleLoveSongManual() {
+            if (!isMusicPlaying) {
+                startMusicAuto();
+            } else {
+                audioElement.pause();
+                stopSynthesizedMelody();
+                isMusicPlaying = false;
+                musicToggle.classList.remove('playing');
+                musicLabel.textContent = "LOVE 🎵 (تشغيل)";
+            }
+        }
+        let audioCtx;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function playTone(freq) {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.01, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.55);
+            } catch(e){}
+        }
+
+        let melodyInterval;
+        function startSynthesizedLoveMelody() {
+            const chords = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.00];
+            let noteIdx = 0;
+            melodyInterval = setInterval(() => {
+                playTone(chords[noteIdx % chords.length]);
+                noteIdx++;
+            }, 600);
+        }
+        function stopSynthesizedMelody() {
+            if (melodyInterval) clearInterval(melodyInterval);
+        }
+
+        /* جزيئات الخلفية */
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function setCanvasDimensions() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', setCanvasDimensions);
+        setCanvasDimensions();
+
+        class Sparkle {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 40;
+                this.size = Math.random() * 10 + 6;
+                this.speedY = Math.random() * 0.6 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.isHeart = Math.random() > 0.4;
+                const colors = ['#eab7e4', '#c03144', '#a1cde8', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20 || this.x < -20 || this.x > canvas.width + 20) this.init();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if (this.isHeart) {
+                    const top = this.size * 0.3;
+                    ctx.moveTo(0, top);
+                    ctx.bezierCurveTo(0, 0, -this.size / 2, 0, -this.size / 2, top);
+                    ctx.bezierCurveTo(-this.size / 2, (this.size + top) / 2, 0, this.size, 0, this.size);
+                    ctx.bezierCurveTo(0, this.size, this.size / 2, (this.size + top) / 2, this.size / 2, top);
+                    ctx.bezierCurveTo(this.size / 2, 0, 0, 0, 0, top);
+                } else {
+                    ctx.arc(0, 0, this.size * 0.35, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 35; i++) {
+            const p = new Sparkle();
+            p.y = Math.random() * canvas.height;
+            particles.push(p);
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        function spawnHeartBurst() {
+            const icons = ['💋', '💖', '✨', '🌹', '❤️'];
+            for (let i = 0; i < 15; i++) {
+                createFlyingIcon(icons[Math.floor(Math.random() * icons.length)]);
+            }
+        }
+
+        function explodeHearts() {
+            playTone(880);
+            const emojis = ['💋', '❤️', '💖', '🥰', '🌹', '✨'];
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    createFlyingIcon(emojis[Math.floor(Math.random() * emojis.length)]);
+                }, i * 35);
+            }
+        }
+
+        function createFlyingIcon(char) {
+            const el = document.createElement('div');
+            el.textContent = char;
+            el.style.position = 'fixed';
+            el.style.left = `${Math.random() * 80 + 10}vw`;
+            el.style.top = `${Math.random() * 50 + 30}vh`;
+            el.style.fontSize = `${Math.random() * 22 + 20}px`;
+            el.style.pointerEvents = 'none';
+            el.style.zIndex = '9999';
+            el.style.transition = 'all 1.6s cubic-bezier(0.1, 0.8, 0.2, 1)';
+            el.style.opacity = '1';
+            el.style.transform = 'translate(-50%, -50%) scale(0.3)';
+            document.body.appendChild(el);
+
+            requestAnimationFrame(() => {
+                const moveX = (Math.random() - 0.5) * 180;
+                const moveY = (Math.random() - 0.8) * 260;
+                el.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px)) scale(1.3)`;
+                el.style.opacity = '0';
+            });
+
+            setTimeout(() => el.remove(), 1700);
+        }
+    </script>
+</body>
+</html>
